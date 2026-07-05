@@ -230,9 +230,12 @@ button{cursor:pointer;font-family:'Nunito',sans-serif}
     <p class="card-sub">Portal de seguimiento de proyectos</p>
     <div class="rule"></div>
     <label class="fl">Usuario</label>
-    <input class="fi" type="text" id="loginUser" placeholder="usuario">
+    <input class="fi" type="text" id="loginUser" placeholder="usuario@dominio.com">
     <label class="fl">Contraseña</label>
-    <input class="fi" type="password" id="loginPass" placeholder="contraseña" onkeypress="if(event.key==='Enter')doLogin()">
+    <div style="position:relative;margin-bottom:14px">
+      <input class="fi" type="password" id="loginPass" placeholder="contraseña" onkeypress="if(event.key==='Enter')doLogin()" style="padding-right:36px">
+      <button type="button" id="toggleBtn" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:14px;cursor:pointer;color:var(--tx2);opacity:0.6" onclick="togglePassVis()">🔒</button>
+    </div>
     <div class="err" id="lerr"></div>
     <button class="btn-in" onclick="doLogin()">Entrar</button>
   </div>
@@ -326,27 +329,43 @@ const PNLS=[
   {icon:'🎯',name:'Dashboard',hint:'Publica tu hoja DASHBOARD y pega la URL en <code>URLS[2]</code>'}
 ];
 
-/* ════ LOGIN ════ */
-function doLogin(){
+function togglePassVis(){
+  const passField=document.getElementById('loginPass');
+  const toggleBtn=document.getElementById('toggleBtn');
+  const isPassword=passField.type==='password';
+  passField.type=isPassword?'text':'password';
+  toggleBtn.textContent=isPassword?'🔓':'🔒';
+}
+
+async function doLogin(){
   const u=document.getElementById('loginUser').value.trim();
   const p=document.getElementById('loginPass').value;
   const errEl=document.getElementById('lerr');
   errEl.classList.remove('on');
   if(!u||!p){errEl.textContent='Completa usuario y contraseña.';errEl.classList.add('on');return}
-  const found=USERS.find(x=>x.user===u&&x.pass===p);
-  if(!found){errEl.textContent='Usuario o contraseña incorrectos.';errEl.classList.add('on');document.getElementById('loginUser').parentElement.classList.add('shake');return}
-  currentUser=found;
-  document.getElementById('login').classList.add('gone');
-  document.getElementById('portal').classList.remove('gone');
-  if(found.role==='internal')document.getElementById('editBtn').style.display='block';
-  initPortal();
+  
+  try{
+    const res=await fetch(URLS.api+'?ts='+Date.now());
+    const data=await res.json();
+    const found=data.users.find(x=>(x.correo===u||x.nombre===u)&&x.pass===p);
+    if(!found){errEl.textContent='Usuario o contraseña incorrectos.';errEl.classList.add('on');document.getElementById('loginUser').parentElement.classList.add('shake');return}
+    currentUser={name:found.nombre,role:found.rol==='I4L'?'internal':'external',correo:found.correo};
+    document.getElementById('login').classList.add('gone');
+    document.getElementById('portal').classList.remove('gone');
+    if(found.rol==='I4L')document.getElementById('editBtn').style.display='block';
+    initPortal();
+  }catch(e){
+    errEl.textContent='Error al conectar. Intenta de nuevo.';errEl.classList.add('on');
+  }
 }
+
 function doLogout(){
   currentUser=null;
   document.getElementById('login').classList.remove('gone');
   document.getElementById('portal').classList.add('gone');
   document.getElementById('loginUser').value='';
   document.getElementById('loginPass').value='';
+  document.getElementById('loginPass').type='password';
 }
 function openSheet(){
   if(URLS.sheet&&URLS.sheet.trim()!=='')window.open(URLS.sheet,'_blank');
