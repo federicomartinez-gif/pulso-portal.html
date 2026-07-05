@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PULSO · Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:     #edf4ff;
+  --srf:    #ffffff;
+  --srf2:   #f4f9ff;
+  --blue:   #0071CE;
+  --blue2:  #005fa8;
+  --blue-lt:#ddeeff;
+  --blue-xs:#eef6ff;
+  --yel:    #FFC220;
+  --yel2:   #e6ab00;
+  --tx0:    #1a2030;
+  --tx1:    #4a5568;
+  --tx2:    #8896aa;
+  --br:     #c8dff5;
+  --br2:    #a0c8e8;
+  --sh:     rgba(0,113,206,0.10);
+  --hh:     56px;
+  --hf:     42px;
+  --r:      12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;
+  background:linear-gradient(150deg,#daeeff 0%,#edf4ff 50%,#f0f8ff 100%);
+  color:var(--tx0);font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased}
+button{cursor:pointer;font-family:'Nunito',sans-serif}
+.gone{display:none!important}
+
+/* ──────────── LOGIN ──────────── */
+#login{position:fixed;inset:0;z-index:50;display:flex;align-items:center;
+  justify-content:center;transition:opacity .45s ease}
+
+.card{width:min(390px,92vw);padding:48px 40px 40px;
+  background:rgba(255,255,255,0.92);
+  border:1.5px solid var(--blue-lt);border-radius:20px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 12px 48px var(--sh),0 2px 8px rgba(0,113,206,0.06);
+  animation:rise .55s cubic-bezier(.16,1,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--blue);
+  border:1.5px solid var(--br2);border-radius:40px;padding:5px 14px;margin-bottom:26px}
+.card-title{font-size:40px;font-weight:300;letter-spacing:.04em;color:var(--tx0);
+  line-height:1;margin-bottom:6px}
+.card-sub{font-size:12px;font-weight:500;color:var(--tx2);margin-bottom:32px}
+.rule{height:1px;background:var(--br);margin-bottom:28px}
+.fl{display:block;font-size:9px;font-weight:700;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--tx2);margin-bottom:8px}
+.fi{width:100%;padding:13px 15px;margin-bottom:14px;
+  background:var(--srf2);border:1.5px solid var(--br);border-radius:var(--r);
+  color:var(--tx0);font-family:'Nunito',sans-serif;font-size:16px;font-weight:500;
+  outline:none;transition:border-color .22s,box-shadow .22s;min-height:48px;
+  -webkit-appearance:none;appearance:none}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,206,.1)}
+.err{font-size:11px;font-weight:600;color:#c0392b;margin-bottom:16px;
+  min-height:16px;opacity:0;transition:opacity .22s}
+.err.on{opacity:1}
+.btn-in{width:100%;padding:15px;background:var(--yel);border:none;
+  border-radius:var(--r);color:var(--tx0);font-family:'Nunito',sans-serif;
+  font-size:13px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  min-height:52px;transition:background .2s,transform .2s,box-shadow .2s;
+  -webkit-appearance:none;appearance:none}
+.btn-in:hover{background:var(--yel2);transform:translateY(-1px);
+  box-shadow:0 6px 24px rgba(255,194,32,.38)}
+.btn-in:active{transform:translateY(0)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake .32s ease}
+
+/* ──────────── PORTAL ──────────── */
+#portal{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.ph{height:var(--hh);min-height:var(--hh);display:flex;align-items:center;
+  padding:0 14px;gap:10px;background:rgba(255,255,255,0.95);
+  border-bottom:2px solid var(--blue-lt);position:relative;z-index:10}
+.brand{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--blue);flex-shrink:0}
+
+.tabs{display:flex;align-items:center;gap:2px;background:var(--blue-xs);
+  border:1.5px solid var(--br);border-radius:100px;padding:3px;
+  margin:0 auto;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 16px;border:none;border-radius:100px;background:transparent;
+  color:var(--tx2);font-family:'Nunito',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;transition:all .22s;white-space:nowrap;
+  min-height:34px}
+.tab:hover{color:var(--blue)}
+.tab.on{background:var(--blue);color:#fff;font-weight:700;
+  box-shadow:0 2px 10px rgba(0,113,206,.28)}
+
+.edit-btn{flex-shrink:0;padding:7px 13px;background:var(--blue-xs);
+  border:1.5px solid var(--br2);border-radius:100px;color:var(--blue);
+  font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;transition:all .2s;white-space:nowrap}
+.edit-btn:hover{background:var(--blue-lt)}
+.out-btn{flex-shrink:0;padding:7px 13px;background:transparent;
+  border:1.5px solid var(--br);border-radius:100px;color:var(--tx2);
+  font-family:'Nunito',sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;transition:all .2s}
+.out-btn:hover{border-color:var(--br2);color:var(--tx0)}
+
+.pm{flex:1;position:relative;overflow:hidden}
+.slider{display:flex;width:500%;height:100%;
+  transition:transform .5s cubic-bezier(.25,.46,.45,.94)}
+.panel{width:20%;height:100%;display:flex;flex-direction:column}
+
+.ptop{display:flex;align-items:center;padding:6px 13px;gap:7px;flex-shrink:0}
+.ppip{width:5px;height:5px;border-radius:50%;background:var(--blue)}
+.pname{font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--tx2)}
+.ptag{margin-left:auto;font-size:7.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--blue);border:1px solid var(--br);
+  border-radius:20px;padding:2px 9px;background:var(--blue-xs)}
+
+.fw{flex:1;margin:0 10px 10px;border-radius:var(--r);overflow:hidden;
+  border:1.5px solid var(--br);background:var(--srf);
+  box-shadow:0 2px 16px var(--sh);position:relative}
+.fw iframe{width:100%;height:100%;border:none;display:block}
+.shim{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;background:var(--srf);
+  transition:opacity .4s,visibility .4s}
+.shim.done{opacity:0;visibility:hidden}
+.sp{width:26px;height:26px;border:2px solid var(--blue-lt);border-top-color:var(--blue);
+  border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.stxt{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--tx2)}
+
+.plc{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:14px;padding:32px;text-align:center}
+.plc-icon{width:54px;height:54px;border-radius:14px;background:var(--blue-xs);
+  border:1.5px solid var(--br);display:flex;align-items:center;justify-content:center;font-size:20px}
+.plc-title{font-size:14px;font-weight:700;color:var(--tx0)}
+.plc-note{font-size:11px;font-weight:500;color:var(--tx2);line-height:1.8;max-width:260px}
+.plc-note code{font-family:monospace;font-size:9px;background:var(--blue-xs);
+  border:1px solid var(--br);border-radius:4px;padding:1px 5px;color:var(--blue)}
+
+.arr{position:absolute;top:50%;z-index:5;transform:translateY(-50%);
+  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);
+  border:1.5px solid var(--br);color:var(--tx2);font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 10px var(--sh);transition:all .2s;opacity:0;pointer-events:none}
+.pm:hover .arr:not(:disabled){opacity:1;pointer-events:auto}
+.arr:hover{background:var(--blue-xs);border-color:var(--br2);color:var(--blue)}
+.arr:disabled{opacity:0!important;pointer-events:none}
+.al{left:8px}.ar{right:8px}
+
+.pf{height:var(--hf);min-height:var(--hf);display:flex;align-items:center;
+  justify-content:center;gap:8px;background:rgba(255,255,255,.95);
+  border-top:1.5px solid var(--blue-lt)}
+.dot{width:5px;height:5px;border-radius:3px;background:var(--br2);border:none;padding:0;transition:all .25s}
+.dot.on{width:20px;background:var(--blue)}
+
+/* ── ESTATUS ── */
+.status-wrap{flex:1;margin:0 10px 10px;border-radius:var(--r);overflow:hidden;
+  border:1.5px solid var(--br);background:var(--srf);
+  box-shadow:0 2px 16px var(--sh);display:flex;flex-direction:column}
+.status-head{padding:16px 20px 12px;border-bottom:2px solid var(--blue-lt);flex-shrink:0}
+.status-head h2{font-size:13px;font-weight:700;color:var(--tx0);margin:0}
+#statusList{flex:1;overflow-y:auto;padding:0}
+.status-item{padding:16px 20px;border-bottom:1px solid #f1f5f9;background:#f8fafc}
+.status-item:last-child{border-bottom:none}
+.status-meta{display:flex;justify-content:space-between;margin-bottom:8px}
+.status-author{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--blue)}
+.status-date{font-size:8px;color:var(--tx2)}
+.status-text{font-size:12px;line-height:1.6;color:var(--tx1);word-break:break-word}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:40px 30px;text-align:center;color:var(--tx2);height:100%}
+.empty-state span{font-size:28px;opacity:.5}
+.empty-state p{font-size:12px;max-width:200px}
+
+/* ── CHAT ── */
+.chat-wrap{flex:1;margin:0 10px 10px;border-radius:var(--r);overflow:hidden;
+  border:1.5px solid var(--br);background:var(--srf);
+  box-shadow:0 2px 16px var(--sh);display:flex;flex-direction:column}
+.chat-head{padding:12px 16px;border-bottom:1.5px solid var(--blue-lt);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-head h2{font-size:12px;font-weight:700;color:var(--tx0);margin:0;flex:1}
+#chatSt{font-size:8px;font-weight:600;text-transform:uppercase;color:var(--tx2)}
+
+.chat-ctrl{display:flex;flex-direction:column;gap:10px;padding:12px;border-bottom:1.5px solid var(--blue-lt);
+  flex-shrink:0;background:#f8fafc}
+.chat-para{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chat-para label{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--tx1);flex-shrink:0;margin:0}
+.chat-para select{flex:1;min-width:120px;padding:7px 10px;font-size:11px;
+  border:1.5px solid var(--br);border-radius:6px;background:white;color:var(--tx0);
+  font-family:'Nunito',sans-serif;-webkit-appearance:none;appearance:none;cursor:pointer}
+.chat-para select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,206,.1)}
+.chat-msg{display:flex;gap:8px;align-items:flex-end}
+.chat-msg textarea{flex:1;padding:9px 12px;font-size:12px;min-height:44px;max-height:100px;
+  border:1.5px solid var(--br);border-radius:8px;background:var(--srf2);
+  color:var(--tx0);font-family:'Nunito',sans-serif;resize:vertical;-webkit-appearance:none;appearance:none}
+.chat-msg textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,113,206,.1)}
+.send-btn{padding:9px 14px;background:var(--blue);color:white;border:none;
+  border-radius:8px;font-weight:700;font-size:12px;min-height:44px;min-width:44px;
+  transition:background .2s;cursor:pointer;flex-shrink:0}
+.send-btn:hover{background:var(--blue2)}
+.send-btn:disabled{opacity:.5;cursor:not-allowed}
+#cerr{font-size:10px;font-weight:600;color:#c0392b;padding:0 12px;margin-top:8px;
+  min-height:14px;opacity:0;transition:opacity .22s}
+#cerr.on{opacity:1}
+
+#chatHist{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.brow{display:flex;gap:8px;animation:slide .3s ease}
+@keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:white;flex-shrink:0}
+.av.i4l{background:var(--blue)}
+.av.cli{background:#059669}
+.bub{flex:1;display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:10px}
+.brow.i4l .bub{background:#eff6ff;border-left:3px solid var(--blue)}
+.brow.cli .bub{background:#ecfdf5;border-left:3px solid #059669}
+.bub-who{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--tx0)}
+.bub-txt{font-size:12px;line-height:1.5;color:var(--tx1);word-break:break-word}
+.bub-ts{font-size:8px;color:var(--tx2);margin-top:2px}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="card">
+    <div class="badge">PULSO</div>
+    <h1 class="card-title">Capacitación</h1>
+    <p class="card-sub">Portal de seguimiento de proyectos</p>
+    <div class="rule"></div>
+    <label class="fl">Usuario</label>
+    <input class="fi" type="text" id="loginUser" placeholder="usuario">
+    <label class="fl">Contraseña</label>
+    <input class="fi" type="password" id="loginPass" placeholder="contraseña" onkeypress="if(event.key==='Enter')doLogin()">
+    <div class="err" id="lerr"></div>
+    <button class="btn-in" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<div id="portal" class="gone">
+  <div class="ph">
+    <span class="brand">✦ PULSO</span>
+    <div class="tabs" id="tabsContainer">
+      <button class="tab on" onclick="go(0)">📊 Panel</button>
+      <button class="tab" onclick="go(1)">📈 Gantt</button>
+      <button class="tab" onclick="go(2)">🎯 Dashboard</button>
+      <button class="tab" onclick="go(3)">📢 Estatus</button>
+      <button class="tab" onclick="go(4)">💬 Chat</button>
+    </div>
+    <button class="edit-btn" onclick="openSheet()" id="editBtn" style="display:none">Editar</button>
+    <button class="out-btn" onclick="doLogout()">Salir</button>
+  </div>
+
+  <div class="pm" id="pm">
+    <div class="slider" id="slider">
+      <div class="panel">
+        <div class="ptop"><div class="ppip"></div><div class="pname">Panel de control</div><div class="ptag">Inicio</div></div>
+        <div class="fw"><div class="shim" id="s0"><div class="sp"></div><div class="stxt">Cargando</div></div><iframe id="f0"></iframe><div class="plc" id="p0"></div></div>
+      </div>
+      <div class="panel">
+        <div class="ptop"><div class="ppip"></div><div class="pname">Diagrama Gantt</div><div class="ptag">Cronograma</div></div>
+        <div class="fw"><div class="shim" id="s1"><div class="sp"></div><div class="stxt">Cargando</div></div><iframe id="f1"></iframe><div class="plc" id="p1"></div></div>
+      </div>
+      <div class="panel">
+        <div class="ptop"><div class="ppip"></div><div class="pname">Dashboard</div><div class="ptag">Indicadores</div></div>
+        <div class="fw"><div class="shim" id="s2"><div class="sp"></div><div class="stxt">Cargando</div></div><iframe id="f2"></iframe><div class="plc" id="p2"></div></div>
+      </div>
+      <div class="panel">
+        <div class="status-wrap">
+          <div class="status-head"><h2>Reportes de avance</h2></div>
+          <div id="statusList"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="chat-wrap">
+          <div class="chat-head"><h2>Mensajes del proyecto</h2><span id="chatSt">No configurado</span></div>
+          <div id="chatHist"></div>
+          <div class="chat-ctrl">
+            <div class="chat-para">
+              <label>Para:</label>
+              <select id="chatPara" onchange="document.getElementById('cerr').classList.remove('on')">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="chat-msg">
+              <textarea id="chatMsg" placeholder="Escribe tu mensaje..."></textarea>
+              <button class="send-btn" onclick="sendMsg()">→</button>
+            </div>
+            <div id="cerr"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="arr al" id="aL" onclick="go(cur-1)">‹</button>
+    <button class="arr ar" id="aR" onclick="go(cur+1)">›</button>
+  </div>
+
+  <div class="pf">
+    <button class="dot on" onclick="go(0)"></button>
+    <button class="dot" onclick="go(1)"></button>
+    <button class="dot" onclick="go(2)"></button>
+    <button class="dot" onclick="go(3)"></button>
+    <button class="dot" onclick="go(4)"></button>
+  </div>
+</div>
+
+<script>
+/* ════ CONFIG ════ */
+const URLS={
+  api:'',
+  sheet:'',
+  ctrl:0,ctrl1:0,ctrl2:0,ctrl3:0,ctrl4:0
+};
+const USERS=[
+  {user:'admin',pass:'Ideas2026$',role:'internal',name:'Admin'},
+  {user:'cliente',pass:'Ideas2026$',role:'external',name:'Cliente'}
+];
+let cur=0,currentUser=null;
+const PNLS=[
+  {icon:'📊',name:'Panel de control',hint:'Vincula tus hojas publicadas en: Archivo → Compartir → Publicar en web. Copia la URL aquí en <code>URLS[0]</code>'},
+  {icon:'📈',name:'Diagrama Gantt',hint:'Publica tu hoja GANTT y pega la URL en <code>URLS[1]</code>'},
+  {icon:'🎯',name:'Dashboard',hint:'Publica tu hoja DASHBOARD y pega la URL en <code>URLS[2]</code>'}
+];
+
+/* ════ LOGIN ════ */
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('lerr');
+  errEl.classList.remove('on');
+  if(!u||!p){errEl.textContent='Completa usuario y contraseña.';errEl.classList.add('on');return}
+  const found=USERS.find(x=>x.user===u&&x.pass===p);
+  if(!found){errEl.textContent='Usuario o contraseña incorrectos.';errEl.classList.add('on');document.getElementById('loginUser').parentElement.classList.add('shake');return}
+  currentUser=found;
+  document.getElementById('login').classList.add('gone');
+  document.getElementById('portal').classList.remove('gone');
+  if(found.role==='internal')document.getElementById('editBtn').style.display='block';
+  initPortal();
+}
+function doLogout(){
+  currentUser=null;
+  document.getElementById('login').classList.remove('gone');
+  document.getElementById('portal').classList.add('gone');
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+}
+function openSheet(){
+  if(URLS.sheet&&URLS.sheet.trim()!=='')window.open(URLS.sheet,'_blank');
+  else alert('Configura URLS.sheet con el link de tu Google Sheet para habilitar la edición rápida.');
+}
+
+/* ════ INIT ════ */
+function initPortal(){
+  for(let i=0;i<3;i++){
+    const url=URLS[i],fr=document.getElementById('f'+i),
+          sh=document.getElementById('s'+i),ph=document.getElementById('p'+i);
+    if(url&&url.trim()!==''){
+      try{
+        fr.addEventListener('load',()=>{try{sh.classList.add('done')}catch(_){}});
+        fr.src=url;
+      }catch(_){sh.classList.add('done')}
+    }else{
+      sh.classList.add('done');fr.style.display='none';
+      const d=PNLS[i];
+      ph.innerHTML=`<div class="plc"><div class="plc-icon">${d.icon}</div><div class="plc-title">${d.name}</div><div class="plc-note">${d.hint}</div></div>`;
+    }
+  }
+  loadData();go(0);
+}
+
+/* ════ DATA ════ */
+async function loadData(){
+  const api=URLS.api;
+  if(!api||api.trim()===''){renderStatusPH();renderChatPH();return}
+  document.getElementById('chatSt').textContent='Cargando...';
+  try{
+    const res=await fetch(api+'?type=all&ts='+Date.now());
+    const data=await res.json();
+    renderStatus(data.status||[]);
+    renderMsgs(data.messages||[]);
+    populatePara(data.users||[]);
+    document.getElementById('chatSt').textContent='En línea';
+  }catch(e){
+    renderStatusPH();renderChatPH();
+    document.getElementById('chatSt').textContent='Sin conexión';
+  }
+}
+
+function populatePara(users){
+  const sel=document.getElementById('chatPara');
+  while(sel.options.length>1)sel.remove(1);
+  const myName=currentUser?currentUser.name:'';
+  users.forEach(u=>{
+    if(u.nombre===myName)return;
+    const opt=document.createElement('option');
+    opt.value=u.nombre;
+    opt.textContent='@ '+u.nombre;
+    sel.appendChild(opt);
+  });
+}
+
+function renderStatus(items){
+  const list=document.getElementById('statusList');
+  if(!items||!items.length){
+    list.innerHTML='<div class="empty-state"><span>📋</span><p>Aún no hay reportes publicados.</p></div>';return;
+  }
+  list.innerHTML=items.map(s=>`
+    <div class="status-item">
+      <div class="status-meta">
+        <span class="status-author">${esc(s.autor)}</span>
+        <span class="status-date">${esc(s.fecha)} ${esc(s.hora)}</span>
+      </div>
+      <div class="status-text">${esc(s.texto)}</div>
+    </div>`).join('');
+}
+
+function renderMsgs(items){
+  const hist=document.getElementById('chatHist');
+  if(!items||!items.length){
+    hist.innerHTML='<div class="empty-state"><span>💬</span><p>Aún no hay mensajes. ¡Escribe el primero!</p></div>';return;
+  }
+  hist.innerHTML=items.map(m=>{
+    const isI4L=m.role==='I4L',cls=isI4L?'i4l':'cli',ini=m.sender?m.sender.charAt(0).toUpperCase():'?',emoji=isI4L?'👨‍💼':'👤';
+    return`<div class="brow ${cls}">
+      <div class="av ${cls}">${emoji}</div>
+      <div class="bub ${cls}">
+        <div class="bub-who">${esc(m.sender)}</div>
+        <div class="bub-txt">${esc(m.msg)}</div>
+        <div class="bub-ts">${esc(m.fecha)} · ${esc(m.hora)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  hist.scrollTop=hist.scrollHeight;
+}
+
+function renderStatusPH(){document.getElementById('statusList').innerHTML='<div class="empty-state"><span>🔧</span><p>Configura <code>URLS.api</code> para ver los reportes en vivo.</p></div>'}
+function renderChatPH(){document.getElementById('chatHist').innerHTML='<div class="empty-state"><span>🔧</span><p>Configura <code>URLS.api</code> para activar el chat en vivo.</p></div>';document.getElementById('chatSt').textContent='No configurado'}
+
+/* ════ SEND ════ */
+async function sendMsg(){
+  if(!currentUser){return}
+  const msg=document.getElementById('chatMsg').value.trim();
+  const para=document.getElementById('chatPara').value;
+  const errEl=document.getElementById('cerr');
+  const api=URLS.api;
+  errEl.classList.remove('on');
+  if(!msg){errEl.textContent='Escribe un mensaje antes de enviar.';errEl.classList.add('on');return}
+  if(!api||api.trim()===''){errEl.textContent='El chat aún no está configurado.';errEl.classList.add('on');return}
+
+  const btn=document.querySelector('.send-btn');
+  btn.textContent='...';btn.disabled=true;
+
+  const hist=document.getElementById('chatHist');
+  if(hist.querySelector('.empty-state'))hist.innerHTML='';
+  const isI4L=currentUser.role==='internal';
+  const cls=isI4L?'i4l':'cli';
+  const emoji=isI4L?'👨‍💼':'👤';
+  const div=document.createElement('div');
+  div.className='brow '+cls;
+  div.innerHTML=`<div class="av ${cls}">${emoji}</div>
+    <div class="bub ${cls}"><div class="bub-who">${esc(currentUser.name)}</div>
+    <div class="bub-txt">${esc(msg)}</div><div class="bub-ts">Ahora</div></div>`;
+  hist.appendChild(div);hist.scrollTop=hist.scrollHeight;
+  document.getElementById('chatMsg').value='';
+
+  try{
+    const res=await fetch(api,{method:'POST',
+      body:JSON.stringify({nombre:currentUser.name,mensaje:msg,para,role:currentUser.role==='internal'?'I4L':'cli'})});
+    const data=await res.json();
+    if(!data.ok){errEl.textContent='Error al enviar. Inténtalo de nuevo.';errEl.classList.add('on')}
+    setTimeout(loadData,1800);
+  }catch(e){errEl.textContent='No se pudo conectar.';errEl.classList.add('on')}
+  finally{btn.textContent='→';btn.disabled=false}
+}
+
+/* ════ NAV ════ */
+function go(index){
+  cur=Math.max(0,Math.min(4,index));
+  document.getElementById('slider').style.transform=`translateX(-${cur*20}%)`;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===cur));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
+  document.getElementById('aL').disabled=(cur===0);
+  document.getElementById('aR').disabled=(cur===4);
+  if((cur===3||cur===4)&&URLS.api)loadData();
+}
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('portal').classList.contains('gone'))return;
+  if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);
+});
+let sx=0;
+const pmEl=document.getElementById('pm');
+pmEl.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+pmEl.addEventListener('touchend',e=>{const dx=sx-e.changedTouches[0].clientX;if(Math.abs(dx)>44)go(dx>0?cur+1:cur-1)},{passive:true});
+document.getElementById('chatMsg').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
+
+function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+</script>
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║  CONFIGURACIÓN INICIAL                                       ║
+║  1. URLS.api → URL del Web App del Apps Script              ║
+║  2. URLS.sheet → URL del Sheet para edición (admin)         ║
+║  3. URLS[0], URLS[1], URLS[2] → URLs de hojas publicadas   ║
+║  4. USERS → agregar usuarios si es necesario                ║
+║                                                              ║
+║  Usuarios por defecto:                                       ║
+║  admin + Ideas2026$     → rol interno (ve botón Editar)    ║
+║  cliente + Ideas2026$   → rol cliente (acceso consulta)    ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+
+</body>
+</html>
