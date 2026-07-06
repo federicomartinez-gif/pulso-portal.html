@@ -208,7 +208,7 @@ iframe{width:100%;height:100%;border:none}
 
 /* FONDO WHATSAPP - SVG */
 .chat-msgs::before{
-  content:'';position:absolute;inset:0;pointer-events:none;opacity:0.08;
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:0.18;
   background-image:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><circle cx="150" cy="100" r="120" fill="%238B6B9F" opacity="0.4"/><circle cx="600" cy="250" r="100" fill="%238B6B9F" opacity="0.35"/><circle cx="300" cy="550" r="80" fill="%238B6B9F" opacity="0.3"/><circle cx="1000" cy="250" r="150" fill="%23059669" opacity="0.35"/><circle cx="750" cy="600" r="90" fill="%23059669" opacity="0.3"/><circle cx="600" cy="650" r="100" fill="%23D97B9B" opacity="0.3"/><circle cx="200" cy="400" r="70" fill="%23D97B9B" opacity="0.25"/><path d="M 0 200 Q 300 150, 600 200 T 1200 200" stroke="%238B6B9F" stroke-width="2" fill="none" opacity="0.3"/><path d="M 0 500 Q 400 450, 800 500 T 1200 500" stroke="%23059669" stroke-width="2" fill="none" opacity="0.25"/><path d="M 0 350 Q 300 300, 600 350 T 1200 350" stroke="%23D97B9B" stroke-width="1.5" fill="none" opacity="0.2"/><circle cx="200" cy="180" r="4" fill="%23D97B9B" opacity="0.5"/><circle cx="450" cy="320" r="3" fill="%238B6B9F" opacity="0.4"/><circle cx="750" cy="420" r="2.5" fill="%23059669" opacity="0.35"/><circle cx="950" cy="150" r="3" fill="%23D97B9B" opacity="0.4"/><circle cx="100" cy="600" r="3" fill="%238B6B9F" opacity="0.35"/><circle cx="1100" cy="550" r="2.5" fill="%23059669" opacity="0.4"/><circle cx="600" cy="280" r="3.5" fill="%23D97B9B" opacity="0.35"/><circle cx="850" cy="750" r="2" fill="%238B6B9F" opacity="0.3"/><circle cx="350" cy="700" r="2.5" fill="%23059669" opacity="0.35"/></svg>');
   background-size:cover;background-position:center
 }
@@ -524,7 +524,7 @@ function renderMsgs(items){
   hist.innerHTML=publicMessages.map(m=>{
     const isI4L=m.role==='I4L';
     const cls=isI4L?'i4l':'cli';
-    const emit=m.entregado?'✓✓':m.enviado?'✓':'';
+    const emit=m.entregado?'✓✓':m.enviado?'✓':'✓✓';
     return`<div class="brow ${cls}">
       <div class="av ${cls}">👤</div>
       <div class="bub ${cls}">
@@ -547,7 +547,7 @@ function renderPrivates(items){
   const html=myPrivates.map(m=>{
     const isI4L=m.role==='I4L';
     const cls=isI4L?'i4l':'cli';
-    const emit=m.entregado?'✓✓':m.enviado?'✓':'';
+    const emit=m.entregado?'✓✓':m.enviado?'✓':'✓✓';
     return`<div class="brow ${cls}">
       <div class="av ${cls}">👤</div>
       <div class="bub ${cls}">
