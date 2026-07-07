@@ -408,6 +408,7 @@ async function doLogin(){
     const found=data.users.find(x=>(x.correo===u||x.nombre===u)&&x.pass===p);
     if(!found){errEl.textContent='Usuario o contraseña incorrectos.';errEl.classList.add('on');document.getElementById('loginUser').parentElement.classList.add('shake');return}
     currentUser={name:found.nombre,role:found.rol==='I4L'?'internal':'external',correo:found.correo};
+    try{localStorage.setItem('pulso_session',JSON.stringify(currentUser));}catch(_){}
     document.getElementById('login').classList.add('gone');
     document.getElementById('portal').classList.remove('gone');
     if(found.rol==='I4L')document.getElementById('editBtn').style.display='block';
@@ -419,6 +420,7 @@ async function doLogin(){
 
 function doLogout(){
   currentUser=null;
+  try{localStorage.removeItem('pulso_session');}catch(_){}
   document.getElementById('login').classList.remove('gone');
   document.getElementById('portal').classList.add('gone');
   document.getElementById('loginUser').value='';
@@ -603,6 +605,13 @@ function filterPrivate(otherName){
     </div>`;
   }).join('');
   hist.scrollTop=hist.scrollHeight;
+  // Autoseleccionar el destinatario en el desplegable "Para:"
+  const sel=document.getElementById('chatPara');
+  if(sel){
+    for(let i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===otherName){sel.selectedIndex=i;break;}
+    }
+  }
 }
 
 function renderStatusPH(){document.getElementById('statusList').innerHTML='<div class="empty-state"><span>🔧</span><p>Configura <code>URLS.api</code> para ver los reportes en vivo.</p></div>'}
@@ -666,6 +675,20 @@ pmEl.addEventListener('touchend',e=>{const dx=sx-e.changedTouches[0].clientX;if(
 document.getElementById('chatMsg').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
 
 function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// Restaurar sesión guardada al recargar la página
+(function restoreSession(){
+  try{
+    const saved=localStorage.getItem('pulso_session');
+    if(saved){
+      currentUser=JSON.parse(saved);
+      document.getElementById('login').classList.add('gone');
+      document.getElementById('portal').classList.remove('gone');
+      if(currentUser.role==='internal')document.getElementById('editBtn').style.display='block';
+      initPortal();
+    }
+  }catch(_){}
+})();
 </script>
 
 </body>
