@@ -594,7 +594,7 @@ function renderMsgs(items){
       <div class="bub ${cls}">
         <div class="bub-who">${esc(m.sender)}</div>
         <div class="bub-txt">${esc(m.msg)}</div>
-        <div class="bub-ts"><span>${esc(m.fecha)} · ${esc(m.hora)}</span><span class="deliver">${emit}</span></div>
+        <div class="bub-ts"><span>${horaLimpia(m.hora)}</span><span class="deliver">${emit}</span></div>
       </div>
     </div>`;
   }).join('');
@@ -655,7 +655,7 @@ function filterPrivate(otherName){
       <div class="bub ${cls}">
         <div class="bub-who">${esc(m.sender)} 🔒</div>
         <div class="bub-txt">${esc(m.msg)}</div>
-        <div class="bub-ts"><span>${esc(m.fecha)} · ${esc(m.hora)}</span><span class="deliver">${emit}</span></div>
+        <div class="bub-ts"><span>${horaLimpia(m.hora)}</span><span class="deliver">${emit}</span></div>
       </div>
     </div>`;
   }).join('');
@@ -750,6 +750,28 @@ function toggleSidebar(){
   if(!sb)return;
   const isOpen=sb.classList.toggle('open');
   if(bd)bd.classList.toggle('on',isOpen);
+}
+
+function horaLimpia(v){
+  if(!v)return '';
+  const s=String(v).trim();
+  // Si ya viene formateado con am/pm, devolver tal cual
+  if(/\d{1,2}:\d{2}\s*(am|pm)/i.test(s))return s.toLowerCase();
+  // Caso ISO: tomar HH:MM de la parte después de la T
+  let m=s.match(/T(\d{2}):(\d{2})/);
+  if(m){
+    let hh=parseInt(m[1],10);const min=m[2];
+    const ap=hh>=12?'pm':'am';let h12=hh%12;if(h12===0)h12=12;
+    return h12+':'+min+' '+ap;
+  }
+  // Caso "HH:mm" o "HH:mm:ss"
+  m=s.match(/^(\d{1,2}):(\d{2})/);
+  if(m){
+    let hh=parseInt(m[1],10);const min=m[2];
+    const ap=hh>=12?'pm':'am';let h12=hh%12;if(h12===0)h12=12;
+    return h12+':'+min+' '+ap;
+  }
+  return s;
 }
 
 function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
