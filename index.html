@@ -173,11 +173,22 @@ iframe{width:100%;height:100%;border:none}
 .status-text{font-size:12px;line-height:1.5;color:var(--tx1)}
 
 /* ──────────── CHAT PANEL v9 (FASE 1 + 2) ──────────── */
-.chat-wrap{padding:0;display:grid;grid-template-columns:220px 1fr;overflow:hidden}
+.chat-wrap{padding:0;display:grid;grid-template-columns:220px 1fr;overflow:hidden;position:relative}
 
 .chat-sidebar{background:var(--srf2);border-right:1px solid var(--br-sub);
   display:flex;flex-direction:column;overflow:hidden}
 .chat-sidebar-scroll{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+
+/* Botón para abrir/cerrar el sidebar (visible solo en móvil) */
+.sidebar-toggle{display:none;background:var(--i4l-lt);border:1px solid var(--br-sub);
+  color:var(--i4l);font-size:16px;width:34px;height:34px;border-radius:8px;
+  cursor:pointer;flex-shrink:0;line-height:1}
+.sidebar-close-row{display:none;align-items:center;justify-content:space-between;
+  padding:12px;border-bottom:1px solid var(--br-sub)}
+.sidebar-close-title{font-size:12px;font-weight:700;color:var(--tx0);text-transform:uppercase;letter-spacing:.05em}
+.sidebar-close{background:none;border:none;color:var(--tx2);font-size:16px;cursor:pointer;padding:4px 8px}
+.sidebar-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:19}
+.sidebar-backdrop.on{display:block}
 
 .sidebar-section{padding-bottom:8px;border-bottom:1px solid var(--br-sub);margin-bottom:8px}
 .sidebar-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
@@ -260,6 +271,18 @@ iframe{width:100%;height:100%;border:none}
 .dot.on{background:var(--blue);width:24px;border-radius:100px}
 
 @keyframes slide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* ─────────── MÓVIL: sidebar colapsable ─────────── */
+@media (max-width: 720px){
+  .chat-wrap{grid-template-columns:1fr}
+  .sidebar-toggle{display:inline-flex;align-items:center;justify-content:center}
+  .sidebar-close-row{display:flex}
+  .chat-sidebar{
+    position:absolute;top:0;left:0;bottom:0;width:78%;max-width:300px;z-index:20;
+    transform:translateX(-100%);transition:transform .28s cubic-bezier(.16,1,.3,1);
+    box-shadow:2px 0 16px rgba(0,0,0,.15)
+  }
+  .chat-sidebar.open{transform:translateX(0)}
+}
 </style>
 </head>
 <body>
@@ -321,7 +344,12 @@ iframe{width:100%;height:100%;border:none}
       </div>
       <div class="panel">
         <div class="chat-wrap">
-          <div class="chat-sidebar">
+          <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+          <div class="chat-sidebar" id="chatSidebar">
+            <div class="sidebar-close-row">
+              <span class="sidebar-close-title">Contactos</span>
+              <button class="sidebar-close" onclick="toggleSidebar()" title="Cerrar">✕</button>
+            </div>
             <div class="chat-sidebar-scroll">
               <div class="sidebar-section">
                 <span class="sidebar-label">Participantes</span>
@@ -334,7 +362,10 @@ iframe{width:100%;height:100%;border:none}
             </div>
           </div>
           <div class="chat-main">
-            <div class="chat-head"><h2>Mensajes</h2><span id="chatSt">No configurado</span></div>
+            <div class="chat-head">
+              <button class="sidebar-toggle" onclick="toggleSidebar()" title="Participantes y privados">☰</button>
+              <h2>Mensajes</h2><span id="chatSt">No configurado</span>
+            </div>
             <div id="chatHist" class="chat-msgs"></div>
             <div class="chat-ctrl">
               <div class="chat-para">
@@ -636,6 +667,10 @@ function filterPrivate(otherName){
       if(sel.options[i].value===otherName){sel.selectedIndex=i;break;}
     }
   }
+  // En móvil, cerrar el sidebar tras elegir un privado
+  const sb=document.getElementById('chatSidebar');
+  const bd=document.getElementById('sidebarBackdrop');
+  if(sb&&sb.classList.contains('open')){sb.classList.remove('open');if(bd)bd.classList.remove('on');}
 }
 
 function renderStatusPH(){document.getElementById('statusList').innerHTML='<div class="empty-state"><span>🔧</span><p>Configura <code>URLS.api</code> para ver los reportes en vivo.</p></div>'}
@@ -708,6 +743,14 @@ pmEl.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
 pmEl.addEventListener('touchend',e=>{const dx=sx-e.changedTouches[0].clientX;if(Math.abs(dx)>44)go(dx>0?cur+1:cur-1)},{passive:true});
 
 document.getElementById('chatMsg').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
+
+function toggleSidebar(){
+  const sb=document.getElementById('chatSidebar');
+  const bd=document.getElementById('sidebarBackdrop');
+  if(!sb)return;
+  const isOpen=sb.classList.toggle('open');
+  if(bd)bd.classList.toggle('on',isOpen);
+}
 
 function esc(t){if(!t)return'';return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
