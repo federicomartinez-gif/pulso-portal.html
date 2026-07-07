@@ -380,7 +380,7 @@ const USERS=[
   {user:'admin',pass:'Ideas2026$',role:'internal',name:'Admin'},
   {user:'cliente',pass:'Ideas2026$',role:'external',name:'Cliente'}
 ];
-let cur=0,currentUser=null,allUsers=[];
+let cur=0,currentUser=null,allUsers=[],allPrivates=[];
 const PNLS=[
   {icon:'📊',name:'Control',hint:'Vincula tus hojas publicadas en: Archivo → Compartir → Publicar en web. Copia la URL aquí en <code>URLS[0]</code>'},
   {icon:'📈',name:'Diagrama Gantt',hint:'Publica tu hoja GANTT y pega la URL en <code>URLS[1]</code>'},
@@ -457,6 +457,7 @@ async function loadData(){
     const res=await fetch(api+'?type=all&ts='+Date.now());
     const data=await res.json();
     allUsers=data.users||[];
+    allPrivates=data.privates||[];
     renderStatus(data.status||[]);
     renderMsgs(data.messages||[]);
     renderPrivates(data.privates||[]);
@@ -544,27 +545,9 @@ function renderMsgs(items){
 }
 
 function renderPrivates(items){
-  if(!items||!items.length)return;
-  const myName=currentUser?currentUser.name:'';
-  const myPrivates=items.filter(m=>m.para===myName);
-  const hist=document.getElementById('chatHist');
-  if(!myPrivates.length&&(!hist.innerHTML||hist.innerHTML.includes('empty-state')))return;
-  if(myPrivates.length===0)return;
-  const html=myPrivates.map(m=>{
-    const isI4L=m.role==='I4L';
-    const cls=isI4L?'i4l':'cli';
-    const emit=m.entregado?'✓✓':m.enviado?'✓':'✓✓';
-    return`<div class="brow ${cls}">
-      <div class="av ${cls}">👤</div>
-      <div class="bub ${cls}">
-        <div class="bub-who">${esc(m.sender)} (privado)</div>
-        <div class="bub-txt">${esc(m.msg)}</div>
-        <div class="bub-ts"><span>${esc(m.fecha)} · ${esc(m.hora)}</span><span class="deliver">${emit}</span></div>
-      </div>
-    </div>`;
-  }).join('');
-  hist.innerHTML=(hist.innerHTML||'')+html;
-  hist.scrollTop=hist.scrollHeight;
+  // Los privados ya no se inyectan en el chat público.
+  // Se muestran en su propio hilo al hacer clic en la lista de privados (filterPrivate).
+  return;
 }
 
 function populatePrivates(items){
@@ -573,28 +556,53 @@ function populatePrivates(items){
   const myName=currentUser?currentUser.name:'';
   const grouped={};
   items.forEach(m=>{
-    if(m.para===myName){
-      const sender=m.sender;
-      if(!grouped[sender])grouped[sender]={count:0,lastMsg:''};
-      grouped[sender].count++;
-      grouped[sender].lastMsg=m.msg;
+    let other=null;
+    if(m.para===myName)other=m.sender;        // me lo mandaron
+    else if(m.sender===myName)other=m.para;    // yo lo mandé
+    if(other){
+      if(!grouped[other])grouped[other]={count:0,lastMsg:''};
+      grouped[other].count++;
+      grouped[other].lastMsg=m.msg;
     }
   });
   const entries=Object.entries(grouped);
   if(!entries.length){list.innerHTML='';return}
-  list.innerHTML=entries.map(([sender,data])=>`
-    <div class="participant-item" onclick="filterPrivate('${esc(sender)}')">
+  list.innerHTML=entries.map(([other,data])=>`
+    <div class="participant-item" onclick="filterPrivate('${esc(other)}')">
       <div class="participant-av priv">👤</div>
       <div class="participant-info">
-        <div class="participant-name">${esc(sender)}</div>
+        <div class="participant-name">${esc(other)}</div>
         <div class="participant-role">${data.count} msg</div>
       </div>
     </div>`).join('');
 }
 
-function filterPrivate(senderName){
+function filterPrivate(otherName){
   const hist=document.getElementById('chatHist');
-  hist.innerHTML='<div class="empty-state"><span>🔒</span><p>Chat privado con '+esc(senderName)+'</p></div>';
+  const myName=currentUser?currentUser.name:'';
+  // Mensajes del hilo: los que me mandó esa persona, o los que yo le mandé a esa persona
+  const thread=(allPrivates||[]).filter(m=>
+    (m.sender===otherName && m.para===myName) ||
+    (m.sender===myName && m.para===otherName)
+  );
+  if(!thread.length){
+    hist.innerHTML='<div class="empty-state"><span>🔒</span><p>Chat privado con '+esc(otherName)+'</p></div>';
+    return;
+  }
+  hist.innerHTML=thread.map(m=>{
+    const isI4L=m.role==='I4L';
+    const cls=isI4L?'i4l':'cli';
+    const emit=m.entregado?'✓✓':m.enviado?'✓':'✓✓';
+    return`<div class="brow ${cls}">
+      <div class="av ${cls}">👤</div>
+      <div class="bub ${cls}">
+        <div class="bub-who">${esc(m.sender)} 🔒</div>
+        <div class="bub-txt">${esc(m.msg)}</div>
+        <div class="bub-ts"><span>${esc(m.fecha)} · ${esc(m.hora)}</span><span class="deliver">${emit}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+  hist.scrollTop=hist.scrollHeight;
 }
 
 function renderStatusPH(){document.getElementById('statusList').innerHTML='<div class="empty-state"><span>🔧</span><p>Configura <code>URLS.api</code> para ver los reportes en vivo.</p></div>'}
