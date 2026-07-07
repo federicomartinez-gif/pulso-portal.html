@@ -585,7 +585,7 @@ function renderMsgs(items){
   if(!publicMessages.length){
     hist.innerHTML='<div class="empty-state"><span>💬</span><p>Aún no hay mensajes públicos.</p></div>';return;
   }
-  hist.innerHTML=publicMessages.map(m=>{
+  hist.innerHTML=publicMessages.slice().reverse().map(m=>{
     const isI4L=m.role==='I4L';
     const cls=isI4L?'i4l':'cli';
     const emit=m.entregado?'✓✓':m.enviado?'✓':'✓✓';
@@ -594,7 +594,7 @@ function renderMsgs(items){
       <div class="bub ${cls}">
         <div class="bub-who">${esc(m.sender)}</div>
         <div class="bub-txt">${esc(m.msg)}</div>
-        <div class="bub-ts"><span>${horaLimpia(m.hora)}</span><span class="deliver">${emit}</span></div>
+        <div class="bub-ts"><span>${fechaLimpia(m.fecha)?fechaLimpia(m.fecha)+' · ':''}${horaLimpia(m.hora)}</span><span class="deliver">${emit}</span></div>
       </div>
     </div>`;
   }).join('');
@@ -646,7 +646,7 @@ function filterPrivate(otherName){
     hist.innerHTML='<div class="empty-state"><span>🔒</span><p>Chat privado con '+esc(otherName)+'</p></div>';
     return;
   }
-  hist.innerHTML=thread.map(m=>{
+  hist.innerHTML=thread.slice().reverse().map(m=>{
     const isI4L=m.role==='I4L';
     const cls=isI4L?'i4l':'cli';
     const emit=m.entregado?'✓✓':m.enviado?'✓':'✓✓';
@@ -655,7 +655,7 @@ function filterPrivate(otherName){
       <div class="bub ${cls}">
         <div class="bub-who">${esc(m.sender)} 🔒</div>
         <div class="bub-txt">${esc(m.msg)}</div>
-        <div class="bub-ts"><span>${horaLimpia(m.hora)}</span><span class="deliver">${emit}</span></div>
+        <div class="bub-ts"><span>${fechaLimpia(m.fecha)?fechaLimpia(m.fecha)+' · ':''}${horaLimpia(m.hora)}</span><span class="deliver">${emit}</span></div>
       </div>
     </div>`;
   }).join('');
@@ -750,6 +750,26 @@ function toggleSidebar(){
   if(!sb)return;
   const isOpen=sb.classList.toggle('open');
   if(bd)bd.classList.toggle('on',isOpen);
+}
+
+function fechaLimpia(v){
+  if(!v)return '';
+  const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const s=String(v).trim();
+  // Caso ISO: 2026-07-07T07:00:00.000Z → tomar la parte de fecha
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+  if(m){
+    const yy=m[1], mm=parseInt(m[2],10)-1, dd=m[3];
+    // Ignorar fechas fantasma del tipo 1899
+    if(yy==='1899')return '';
+    return dd+' '+meses[mm]+' '+yy;
+  }
+  // Caso "dd-MMM-yyyy" (ej. 07-jul-2026) → normalizar a "07 jul 2026"
+  m=s.match(/^(\d{1,2})[-\s]([a-zA-Z]{3})[-\s.]*(\d{4})/);
+  if(m){
+    return m[1].padStart(2,'0')+' '+m[2].toLowerCase()+' '+m[3];
+  }
+  return s;
 }
 
 function horaLimpia(v){
